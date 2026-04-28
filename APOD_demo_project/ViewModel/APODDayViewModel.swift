@@ -5,11 +5,11 @@
 //  Created by WEITSUNG on 25/04/2026.
 //
 
-import SwiftUI
+import Foundation
 
 @Observable
 @MainActor
-final class APODDayViewModel: Observable {
+final class APODDayViewModel {
     var apod: APOD?
     var isLoading: Bool = false
     var errorMessage: String?
@@ -22,13 +22,14 @@ final class APODDayViewModel: Observable {
         self.api = api
     }
     
-    func loadAPOD() async {
+    func loadAPOD(date: Date? = nil) async {
         isLoading = true
         errorMessage = nil
+        
         defer { isLoading = false }
         
         do {
-            apod  = try await api.fetchAPOD()
+            apod  = try await api.fetchAPOD(for: date)
         } catch {
             errorMessage = error.localizedDescription
         }

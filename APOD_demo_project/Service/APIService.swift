@@ -7,6 +7,7 @@
 
 import Foundation
 
+let apiURL: String = "https://api.nasa.gov/planetary/apod"
 let apiKey: String = "bZJb4lEjENpe62UgpaMTSXGsiw9QqoXASqxUJcRj"
 
 enum NetworkError: LocalizedError {
@@ -33,14 +34,33 @@ enum NetworkError: LocalizedError {
 }
 
 protocol APIServiceProtocol {
-    func fetchAPOD() async throws -> APOD
+    func fetchAPOD(for date: Date?) async throws -> APOD
 }
 
 class APIService: APIServiceProtocol {
-    func fetchAPOD() async throws -> APOD {
-        let url = URL(string:
-                        "https://api.nasa.gov/planetary/apod?api_key=\(apiKey)")
-        guard let url = url else {
+    
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
+    
+    func fetchAPOD(for date: Date?) async throws -> APOD {
+        
+        var components = URLComponents(string: apiURL)!
+        
+        var queryItems = [
+            URLQueryItem(name: "api_key", value: apiKey)
+        ]
+        
+        if let date {
+            let dateString = dateFormatter.string(from: date)
+            queryItems.append(URLQueryItem(name: "date", value: dateString))
+        }
+        
+        components.queryItems = queryItems
+
+        guard let url = components.url else {
             throw NetworkError.invalidURL
         }
         
@@ -74,4 +94,7 @@ class APIService: APIServiceProtocol {
     }
     
 }
+
+
+
 

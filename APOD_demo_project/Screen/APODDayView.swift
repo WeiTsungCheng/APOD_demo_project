@@ -20,28 +20,36 @@ struct APODDayView: View {
             Group {
                 if let apod = vm.apod {
                     
-                    AsyncImage(url: apod.url) { phase in
-                        switch phase {
-                        case .empty:
-                            ProgressView()
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFit()
-                        case .failure:
-                            Image(systemName: "photo")
-                        @unknown default:
-                            EmptyView()
+                    if apod.mediaType == .image {
+                        AsyncImage(url: apod.url) { phase in
+                            switch phase {
+                            case .empty:
+                                ProgressView()
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                            case .failure:
+                                Image(systemName: "photo")
+                            @unknown default:
+                                EmptyView()
+                            }
                         }
+                        .frame(width: 200, height: 200)
+                        
+                    } else {
+                        WebVideoView(url: apod.url)
+                            .frame(height: 300)
                     }
-                    .frame(width: 200, height: 200)
                     
                 } else {
                     ProgressView()
                 }
                 
             }.task {
-                await vm.loadAPOD()
+//                await vm.loadAPOD(date: Date.fromAPODString("2021-10-10"))
+//                await vm.loadAPOD(date: Date().addingDays(-1))
+                await vm.loadAPOD(date: Date())
             }
         }
     }
