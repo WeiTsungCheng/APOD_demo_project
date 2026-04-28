@@ -10,6 +10,7 @@ import SwiftUI
 struct APODDayView: View {
     
     @State var vm: APODDayViewModel
+    @State var selectedDate: Date = Date()
     
     init(api: APIServiceProtocol) {
         _vm = State(wrappedValue: APODDayViewModel(api: api))
@@ -31,10 +32,16 @@ struct APODDayView: View {
                 } else {
                     Text("No APOD loaded")
                 }
-            }.task {
+            }
+            .task {
                 //                await vm.loadAPOD(date: Date.fromAPODString("2021-10-10"))
                 //                await vm.loadAPOD(date: Date().addingDays(-1))
-                await vm.loadAPOD(date: Date())
+                await vm.loadAPOD(date: selectedDate)
+            }
+            .onChange(of: selectedDate) { _, newDate in
+                Task {
+                    await vm.loadAPOD(date: newDate)
+                }
             }
         }
     }
@@ -72,26 +79,56 @@ extension APODDayView {
     @ViewBuilder var contentView: some View {
         if let apod = vm.apod {
             
-            ScrollView {
-                Text(apod.title)
-                    .font(.title2)
-                    .bold()
-                
-                mediaView
-                    .frame(height: 300)
-                
-                Text(apod.explanation)
-                    .font(.body)
-                
-                if let copyright = apod.copyright {
-                    Text("@ \(copyright)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+            VStack(spacing: 0) {
+                HStack {
+                    Button {
+                        if let newDate = selectedDate.addingDays(-1) {
+                            selectedDate = newDate
+                        }
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .frame(width: 44, height: 44)
+                    }
+                    
+                    DatePicker("Select Date",
+                               selection: $selectedDate,
+                               in: ...Date(),
+                               displayedComponents: .date)
+                    .datePickerStyle(.compact)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    
+                    Button {
+                        if let newDate = selectedDate.addingDays(1),
+                            // prevent user to load future no exist APOD info
+                            newDate <= Date() {
+                                selectedDate = newDate
+                        }
+                        
+                    } label: {
+                        Image(systemName: "chevron.right")
+                            .frame(width: 44, height: 44)
+                    }
                 }
+                
+                ScrollView {
+                    Text(apod.title)
+                        .font(.title2)
+                        .bold()
+                    mediaView
+                        .frame(height: 300)
+                    Text(apod.explanation)
+                        .font(.body)
+                    
+                    if let copyright = apod.copyright {
+                        Text("@ \(copyright)")
+                            .font(.caption)
+                    }
+                }
+                .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
             }
-            .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+            
+            
         }
-        
     }
 }
 

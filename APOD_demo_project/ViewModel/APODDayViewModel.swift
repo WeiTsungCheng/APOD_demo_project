@@ -13,6 +13,7 @@ final class APODDayViewModel {
     var apod: APOD?
     var isLoading: Bool = false
     var errorMessage: String?
+    
     private let api: APIServiceProtocol
     
     init(apod: APOD? = nil, isLoading: Bool = false, errorMessage: String? = nil, api: APIServiceProtocol) {
@@ -31,6 +32,7 @@ final class APODDayViewModel {
         do {
             apod  = try await api.fetchAPOD(for: date)
         } catch {
+            apod = nil
             errorMessage = error.localizedDescription
         }
     }

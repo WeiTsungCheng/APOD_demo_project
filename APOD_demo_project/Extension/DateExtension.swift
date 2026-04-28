@@ -17,6 +17,18 @@ extension Date {
         return formatter.date(from: string)
     }
     
+    private static let apodFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        return formatter
+    }()
+
+    func toAPODString() -> String {
+        Self.apodFormatter.string(from: self)
+    }
+    
     func addingDays(_ days: Int) -> Date? {
         return Calendar.current.date(byAdding: .day, value: days, to: self)
     }
