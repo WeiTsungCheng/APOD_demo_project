@@ -76,39 +76,59 @@ extension APODDayView {
         }
     }
     
+    var header: some View {
+        
+        HStack {
+            Button {
+                if let newDate = selectedDate.addingDays(-1) {
+                    selectedDate = newDate
+                }
+            } label: {
+                Image(systemName: "chevron.left")
+                    .frame(width: 44, height: 44)
+                    .foregroundStyle(.accent)
+            }
+            
+            DatePicker("Select Date",
+                       selection: $selectedDate,
+                       in: ...Date(),
+                       displayedComponents: .date)
+            .datePickerStyle(.compact)
+            .frame(maxWidth: .infinity, alignment: .center)
+            
+            Button {
+                if let newDate = selectedDate.addingDays(1),
+                    // prevent user to load future no exist APOD info
+                    newDate <= Date() {
+                        selectedDate = newDate
+                }
+                
+            } label: {
+                Image(systemName: "chevron.right")
+                    .frame(width: 44, height: 44)
+                    .foregroundStyle(.accent)
+            }
+        }
+    }
+    
+    @ViewBuilder var footer: some View {
+        if let apod = vm.apod {
+            if let copyright = apod.copyright {
+                Text("@ \(copyright)")
+                    .font(.caption)
+            }
+            
+            Text("Version \(apod.serviceVersion)")
+                .font(.footnote)
+        }
+    }
+    
     @ViewBuilder var contentView: some View {
         if let apod = vm.apod {
             
             VStack(spacing: 0) {
-                HStack {
-                    Button {
-                        if let newDate = selectedDate.addingDays(-1) {
-                            selectedDate = newDate
-                        }
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .frame(width: 44, height: 44)
-                    }
-                    
-                    DatePicker("Select Date",
-                               selection: $selectedDate,
-                               in: ...Date(),
-                               displayedComponents: .date)
-                    .datePickerStyle(.compact)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    Button {
-                        if let newDate = selectedDate.addingDays(1),
-                            // prevent user to load future no exist APOD info
-                            newDate <= Date() {
-                                selectedDate = newDate
-                        }
-                        
-                    } label: {
-                        Image(systemName: "chevron.right")
-                            .frame(width: 44, height: 44)
-                    }
-                }
+                
+                header
                 
                 ScrollView {
                     Text(apod.title)
@@ -118,14 +138,12 @@ extension APODDayView {
                         .frame(height: 300)
                     Text(apod.explanation)
                         .font(.body)
-                    
-                    if let copyright = apod.copyright {
-                        Text("@ \(copyright)")
-                            .font(.caption)
-                    }
                 }
                 .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                
+                footer
             }
+            
             
             
         }
