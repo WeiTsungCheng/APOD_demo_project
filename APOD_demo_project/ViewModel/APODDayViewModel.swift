@@ -32,21 +32,24 @@ final class APODDayViewModel {
         
         defer { isLoading = false }
         
+        let date = date ?? Date()
+        let dateString = date.toAPODString()
+        
         do {
             let result = try await api.fetchAPOD(for: date)
             apod = result
-            cache.saveAPOD(result)
+            cache.saveAPOD(result, for: dateString)
             
             if result.mediaType == .image {
-                await loadAndSaveCachedImage(from: result.url)
+                await loadAndSaveCachedImage(from: result.url, for: dateString)
             }
         
         } catch {
-            if let cached = cache.loadAPOD() {
+            if let cached = cache.loadAPOD(for: dateString) {
                 apod = cached
                 
                 if cached.mediaType == .image {
-                    cachedImageData = cache.loadAPODImage()
+                    cachedImageData = cache.loadAPODImage(for: dateString)
                 }
                 print("Failed to load new APOD. Showing cached APOD")
             } else {
@@ -57,11 +60,11 @@ final class APODDayViewModel {
         }
     }
     
-    private func loadAndSaveCachedImage(from url: URL) async {
+    private func loadAndSaveCachedImage(from url: URL, for dateString: String) async {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             cachedImageData = data
-            cache.saveAPODImage(data)
+            cache.saveAPODImage(data, for: dateString)
         } catch {
             print("Faile to load image data", error)
         }

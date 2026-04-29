@@ -8,11 +8,11 @@
 import Foundation
 
 protocol CacheServiceProtocol {
-    func saveAPOD(_ apod: APOD)
-    func loadAPOD() -> APOD?
+    func saveAPOD(_ apod: APOD, for date: String)
+    func loadAPOD(for date: String) -> APOD?
     
-    func saveAPODImage(_ data: Data)
-    func loadAPODImage() -> Data?
+    func saveAPODImage(_ data: Data, for date: String)
+    func loadAPODImage(for date: String) -> Data?
 }
 
 // Save APOD model in UserDefault
@@ -22,32 +22,32 @@ class CacheService: CacheServiceProtocol {
     private let apodKey = "cached_apod_key"
     private let apodImageName = "cached_apod_image"
     
-    private var cachedDirectory: URL? {
-        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+    private var cachedDirectory: URL {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
     }
     
-    private var imageFileURL: URL? {
-        cachedDirectory?.appendingPathComponent(apodImageName)
+    private func imageFileURL(for date: String) -> URL {
+        cachedDirectory.appendingPathComponent(apodImageName + date)
     }
     
-    func saveAPOD(_ apod: APOD) {
+    func saveAPOD(_ apod: APOD, for date: String) {
         do {
             let data = try JSONEncoder().encode(apod)
-            UserDefaults.standard.set(data, forKey: apodKey)
-            print("Success to save APOD")
+            UserDefaults.standard.set(data, forKey: apodKey + date)
+            print("Success to save APOD", date)
         } catch {
             print("Failed to save APOD", error)
         }
     }
     
-    func loadAPOD() -> APOD? {
-        guard let data = UserDefaults.standard.data(forKey: apodKey) else {
+    func loadAPOD(for date: String) -> APOD? {
+        guard let data = UserDefaults.standard.data(forKey: apodKey + date) else {
             return nil
         }
         
         do {
             let apod = try JSONDecoder().decode(APOD.self, from: data)
-            print("Success to load APOD")
+            print("Success to load APOD", date)
             return apod
         } catch {
             print("Failed to load APOD", error)
@@ -55,29 +55,24 @@ class CacheService: CacheServiceProtocol {
         }
     }
     
-    func saveAPODImage(_ data: Data) {
-        if let url = imageFileURL {
-            do {
-                try data.write(to: url)
-                print("Save APOD Image Success")
-            } catch {
-                print("Save APOD Image Failed")
-            }
+    func saveAPODImage(_ data: Data, for date: String) {
+        do {
+            try data.write(to: imageFileURL(for: date))
+            print("Save APOD Image Success")
+        } catch {
+            print("Save APOD Image Failed", error)
         }
     }
     
-    func loadAPODImage() -> Data? {
-        if let url = imageFileURL {
-            do {
-                let data = try Data(contentsOf: url)
-                print("Load APOD Image Success")
-                return data
-            } catch {
-                print("Load APOD Image Failed")
-                return nil
-            }
+    func loadAPODImage(for date: String) -> Data? {
+        do {
+            let data = try Data(contentsOf: imageFileURL(for: date))
+            print("Load APOD Image Success")
+            return data
+        } catch {
+            print("Load APOD Image Failed")
+            return nil
         }
-        return nil
     }
     
     
