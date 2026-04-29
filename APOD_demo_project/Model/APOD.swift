@@ -6,7 +6,7 @@
 //
 import Foundation
 
-enum MediaType: Decodable, Equatable {
+enum MediaType: Codable, Equatable {
     case image
     case video
     case unknown(String)
@@ -25,7 +25,7 @@ enum MediaType: Decodable, Equatable {
     }
 }
 
-struct APOD: Decodable, Identifiable {
+struct APOD: Codable, Identifiable {
     
     let date: String
     let title: String
