@@ -12,6 +12,13 @@ struct APODDayView: View {
     @State var vm: APODDayViewModel
     @State var selectedDate: Date = Date()
     
+    var canGoNextDate: Bool {
+        if let date = selectedDate.addingDays(1) {
+            return date <= Date()
+        }
+        return false
+    }
+    
     init(api: APIServiceProtocol) {
         _vm = State(wrappedValue: APODDayViewModel(api: api))
     }
@@ -21,6 +28,8 @@ struct APODDayView: View {
             
             Group {
                 header
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.systemGray6))
                 
                 VStack(spacing: 0) {
                     
@@ -48,6 +57,8 @@ struct APODDayView: View {
                 }
                 
                 footer
+                    .frame(maxWidth: .infinity)
+                    .background(Color(.systemGray6))
             }
             .task {
                 await vm.loadAPOD(date: selectedDate)
@@ -122,18 +133,26 @@ extension APODDayView {
                     .frame(width: 44, height: 44)
                     .foregroundStyle(.accent)
             }
+            .disabled(!canGoNextDate)
+            .opacity(canGoNextDate ? 1 : 0.3)
         }
     }
     
     @ViewBuilder var footer: some View {
         if let apod = vm.apod {
-            if let copyright = apod.copyright {
-                Text("@ \(copyright)")
-                    .font(.caption)
+            HStack {
+                Spacer()
+                if let copyright = apod.copyright {
+                    Text("@ \(copyright)")
+                        .font(.caption)
+                    Spacer()
+                }
+                
+                Text("Version \(apod.serviceVersion)")
+                    .font(.footnote)
+                Spacer()
             }
             
-            Text("Version \(apod.serviceVersion)")
-                .font(.footnote)
         }
     }
     
