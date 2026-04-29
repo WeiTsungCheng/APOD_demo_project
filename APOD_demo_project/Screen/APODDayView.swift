@@ -20,22 +20,36 @@ struct APODDayView: View {
         NavigationStack {
             
             Group {
-                if vm.isLoading {
-                    ProgressView()
+                header
+                
+                VStack(spacing: 0) {
                     
-                } else if vm.apod != nil {
-                    contentView
-                    
-                } else if let errorMessage = vm.errorMessage {
-                    Text(errorMessage)
-                    
-                } else {
-                    Text("No APOD loaded")
+                    if vm.isLoading {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                        
+                    } else if vm.apod != nil {
+                        ScrollView {
+                            contentView
+                        }
+                        .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+                        
+                    } else if vm.errorMessage != nil{
+                        Spacer()
+                        Text("No content on this date")
+                        Spacer()
+                        
+                    } else {
+                        Spacer()
+                        Text("No APOD loaded")
+                        Spacer()
+                    }
                 }
+                
+                footer
             }
             .task {
-                //                await vm.loadAPOD(date: Date.fromAPODString("2021-10-10"))
-                //                await vm.loadAPOD(date: Date().addingDays(-1))
                 await vm.loadAPOD(date: selectedDate)
             }
             .onChange(of: selectedDate) { _, newDate in
@@ -93,14 +107,14 @@ extension APODDayView {
                        selection: $selectedDate,
                        in: ...Date(),
                        displayedComponents: .date)
-            .datePickerStyle(.compact)
+            .datePickerStyle(.automatic)
             .frame(maxWidth: .infinity, alignment: .center)
             
             Button {
                 if let newDate = selectedDate.addingDays(1),
-                    // prevent user to load future no exist APOD info
-                    newDate <= Date() {
-                        selectedDate = newDate
+                   // prevent user to load future no exist APOD info
+                   newDate <= Date() {
+                    selectedDate = newDate
                 }
                 
             } label: {
@@ -125,27 +139,13 @@ extension APODDayView {
     
     @ViewBuilder var contentView: some View {
         if let apod = vm.apod {
-            
-            VStack(spacing: 0) {
-                
-                header
-                
-                ScrollView {
-                    Text(apod.title)
-                        .font(.title2)
-                        .bold()
-                    mediaView
-                        .frame(height: 300)
-                    Text(apod.explanation)
-                        .font(.body)
-                }
-                .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
-                
-                footer
-            }
-            
-            
-            
+            Text(apod.title)
+                .font(.title2)
+                .bold()
+            mediaView
+                .frame(height: 300)
+            Text(apod.explanation)
+                .font(.body)
         }
     }
 }
