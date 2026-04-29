@@ -23,6 +23,18 @@ enum MediaType: Codable, Equatable {
             self = .unknown(value)
         }
     }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .image:
+            try container.encode("image")
+        case .video:
+            try container.encode("video")
+        case .unknown(let value):
+            try container.encode(value)
+        }
+    }
 }
 
 struct APOD: Codable, Identifiable {

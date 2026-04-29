@@ -19,8 +19,8 @@ struct APODDayView: View {
         return false
     }
     
-    init(api: APIServiceProtocol) {
-        _vm = State(wrappedValue: APODDayViewModel(api: api))
+    init(api: APIServiceProtocol, cache: CacheServiceProtocol) {
+        _vm = State(wrappedValue: APODDayViewModel(api: api, cache: cache))
     }
     
     var body: some View {
@@ -79,25 +79,22 @@ extension APODDayView {
             let url = apod.url
             let type = apod.mediaType
             
-            if type == .image {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
-                        ProgressView()
-                    case .success(let image):
-                        image
+            switch type {
+            case .image:
+                if let data = vm.cachedImageData,
+                    let uiImage = UIImage(data: data) {
+                        Image(uiImage: uiImage)
                             .resizable()
                             .scaledToFit()
-                    case .failure:
-                        Image(systemName: "photo")
-                    @unknown default:
-                        EmptyView()
+                    } else {
+                        ProgressView()
                     }
-                }
-                
-            } else {
+            case .video:
                 WebVideoView(url: url)
+            case .unknown:
+                Text("Unknown Media Type")
             }
+
         }
     }
     
@@ -170,5 +167,5 @@ extension APODDayView {
 }
 
 #Preview {
-    APODDayView(api: APIService())
+    APODDayView(api: APIService(), cache: CacheService())
 }

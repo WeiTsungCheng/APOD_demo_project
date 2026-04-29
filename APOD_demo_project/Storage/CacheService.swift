@@ -34,8 +34,9 @@ class CacheService: CacheServiceProtocol {
         do {
             let data = try JSONEncoder().encode(apod)
             UserDefaults.standard.set(data, forKey: apodKey)
+            print("Success to save APOD")
         } catch {
-            print("Failed to cache APOD")
+            print("Failed to save APOD", error)
         }
     }
     
@@ -46,9 +47,10 @@ class CacheService: CacheServiceProtocol {
         
         do {
             let apod = try JSONDecoder().decode(APOD.self, from: data)
+            print("Success to load APOD")
             return apod
         } catch {
-            print("Failed to load APOD")
+            print("Failed to load APOD", error)
             return nil
         }
     }
@@ -57,6 +59,7 @@ class CacheService: CacheServiceProtocol {
         if let url = imageFileURL {
             do {
                 try data.write(to: url)
+                print("Save APOD Image Success")
             } catch {
                 print("Save APOD Image Failed")
             }
@@ -67,6 +70,7 @@ class CacheService: CacheServiceProtocol {
         if let url = imageFileURL {
             do {
                 let data = try Data(contentsOf: url)
+                print("Load APOD Image Success")
                 return data
             } catch {
                 print("Load APOD Image Failed")
