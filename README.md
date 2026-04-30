@@ -8,14 +8,33 @@ Built with SwiftUI using MVVM architecture.
 
 ## Demo
 
-- Screenshot
+### Screenshot
 
 ![image](https://github.com/WeiTsungCheng/APOD_demo_project/blob/main/demo/screenshot.png)
 
-- Video
+### Video
 
-Click to watch:
+#### Video Flow
+
+- The app first loads and displays today's APOD  
+
+- I navigate backwards day by day using the header buttons  
+
+- Then I jump to a specific date using the date picker  
+
+- After that, I simulate a network failure (100% packet loss)  
+
+- When switching dates:
+
+  - Dates without cached data show no content  
+
+  - Only the previously cached date (the last successfully loaded one) still displays data  
+
+This demonstrates that the app correctly caches only the last successful result and uses it as a fallback when the network is unavailable.
+
+Video File Link:
 https://github.com/WeiTsungCheng/APOD_demo_project/blob/main/demo/video.mov
+
 
 ---
 
