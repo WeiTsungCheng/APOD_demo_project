@@ -19,6 +19,7 @@ protocol CacheServiceProtocol {
 // Save APOD image in FileManager
 class CacheService: CacheServiceProtocol {
     
+    private let cachedDateKey = "cached_date_key"
     private let apodKey = "cached_apod_key"
     private let apodImageName = "cached_apod_image"
     
@@ -26,14 +27,15 @@ class CacheService: CacheServiceProtocol {
         FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
     }
     
-    private func imageFileURL(for date: String) -> URL {
-        cachedDirectory.appendingPathComponent(apodImageName + date)
+    private var imageFileURL: URL {
+        cachedDirectory.appendingPathComponent(apodImageName)
     }
     
     func saveAPOD(_ apod: APOD, for date: String) {
         do {
             let data = try JSONEncoder().encode(apod)
-            UserDefaults.standard.set(data, forKey: apodKey + date)
+            UserDefaults.standard.set(data, forKey: apodKey)
+            UserDefaults.standard.set(date, forKey: cachedDateKey)
             print("Success to save APOD", date)
         } catch {
             print("Failed to save APOD", error)
@@ -41,7 +43,13 @@ class CacheService: CacheServiceProtocol {
     }
     
     func loadAPOD(for date: String) -> APOD? {
-        guard let data = UserDefaults.standard.data(forKey: apodKey + date) else {
+        guard UserDefaults.standard.string(forKey: cachedDateKey) == date else {
+            print("No cached date", date)
+            return nil
+        }
+        
+        guard let data = UserDefaults.standard.data(forKey: apodKey) else {
+            print("No cached APOD data", date)
             return nil
         }
         
@@ -56,24 +64,32 @@ class CacheService: CacheServiceProtocol {
     }
     
     func saveAPODImage(_ data: Data, for date: String) {
+        guard UserDefaults.standard.string(forKey: cachedDateKey) == date else {
+            print("Not cached date for saving APOD Image", date)
+            return
+        }
+        
         do {
-            try data.write(to: imageFileURL(for: date))
-            print("Save APOD Image Success")
+            try data.write(to: imageFileURL)
+            print("Save APOD Image Success", date)
         } catch {
             print("Save APOD Image Failed", error)
         }
     }
     
     func loadAPODImage(for date: String) -> Data? {
+        guard UserDefaults.standard.string(forKey: cachedDateKey) == date else {
+            print("Not cached date for loading APOD Image", date)
+            return nil
+        }
+        
         do {
-            let data = try Data(contentsOf: imageFileURL(for: date))
-            print("Load APOD Image Success")
+            let data = try Data(contentsOf: imageFileURL)
+            print("Load APOD Image Success", date)
             return data
         } catch {
-            print("Load APOD Image Failed")
+            print("Load APOD Image Failed", error)
             return nil
         }
     }
-    
-    
 }
