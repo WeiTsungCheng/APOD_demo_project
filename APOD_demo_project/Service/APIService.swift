@@ -8,13 +8,13 @@
 import Foundation
 
 let apiURL: String = "https://api.nasa.gov/planetary/apod"
-let apiKey: String = "bZJb4lEjENpe62UgpaMTSXGsiw9QqoXASqxUJcRj"
 
 enum NetworkError: LocalizedError {
     case invalidURL
     case invalidResponse
     case badStatusCode(Int)
     case decodingFailed
+    case noAPIKey
     case unknown(Error)
     
     var errorDescription: String? {
@@ -27,6 +27,8 @@ enum NetworkError: LocalizedError {
             return "The server returned an error (\(code))."
         case .decodingFailed:
             return "Failed to decode the server response."
+        case .noAPIKey:
+            return "API key is not provided."
         case .unknown(let error):
             return error.localizedDescription
         }
@@ -46,6 +48,10 @@ class APIService: APIServiceProtocol {
     }()
     
     func fetchAPOD(for date: Date?) async throws -> APOD {
+        
+        guard let apiKey = Secrets.NASAAPIKey else {
+            throw NetworkError.noAPIKey
+        }
         
         var components = URLComponents(string: apiURL)!
         
