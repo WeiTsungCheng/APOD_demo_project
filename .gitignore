@@ -19,6 +19,7 @@ xcuserdata/
 
 # === Environment / Secrets ===
 *.xcconfig
+!Secrets.example.xcconfig
 .env
 
 # === Temporary files ===
