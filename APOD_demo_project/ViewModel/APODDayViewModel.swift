@@ -14,6 +14,7 @@ final class APODDayViewModel {
     var isLoading: Bool = false
     var errorMessage: String?
     var cachedImageData: Data?
+    private var currentRequestDate: String?
     
     private let api: APIServiceProtocol
     private let cache: CacheServiceProtocol
@@ -28,16 +29,28 @@ final class APODDayViewModel {
     
     func loadAPOD(date: Date? = nil) async {
         isLoading = true
+        apod = nil
         errorMessage = nil
         cachedImageData = nil
         
-        defer { isLoading = false }
-        
         let date = date ?? Date()
         let dateString = date.toAPODString()
+        currentRequestDate = dateString
+        
+        defer {
+            if currentRequestDate == dateString {
+                isLoading = false
+            }
+        }
         
         do {
             let result = try await api.fetchAPOD(for: date)
+            
+            guard currentRequestDate == dateString else {
+                print("discard outdated response")
+                return
+            }
+            
             apod = result
             cache.saveAPOD(result, for: dateString)
             
@@ -46,6 +59,11 @@ final class APODDayViewModel {
             }
         
         } catch {
+            
+            guard currentRequestDate == dateString else {
+                return
+            }
+            
             if let cached = cache.loadAPOD(for: dateString) {
                 apod = cached
                 
@@ -64,6 +82,12 @@ final class APODDayViewModel {
     private func loadAndSaveCachedImage(from url: URL, for dateString: String) async {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
+            
+            guard currentRequestDate == dateString else {
+                print("discard outdated image response")
+                return
+            }
+            
             cachedImageData = data
             cache.saveAPODImage(data, for: dateString)
         } catch {
@@ -71,8 +95,5 @@ final class APODDayViewModel {
         }
         
     }
-    
-    
-    
 }
 
