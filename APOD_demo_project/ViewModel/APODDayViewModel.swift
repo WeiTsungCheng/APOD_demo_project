@@ -29,6 +29,7 @@ final class APODDayViewModel {
     func loadAPOD(date: Date? = nil) async {
         isLoading = true
         errorMessage = nil
+        cachedImageData = nil
         
         defer { isLoading = false }
         
