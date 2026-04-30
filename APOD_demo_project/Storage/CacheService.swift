@@ -7,14 +7,6 @@
 
 import Foundation
 
-protocol CacheServiceProtocol {
-    func saveAPOD(_ apod: APOD, for date: String)
-    func loadAPOD(for date: String) -> APOD?
-    
-    func saveAPODImage(_ data: Data, for date: String)
-    func loadAPODImage(for date: String) -> Data?
-}
-
 // Save APOD model in UserDefault
 // Save APOD image in FileManager
 class CacheService: CacheServiceProtocol {
