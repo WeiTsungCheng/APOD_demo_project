@@ -25,6 +25,9 @@ extension APODDayView {
                     .font(.footnote)
                 Spacer()
             }
+            .padding(.top, 8)
+            .foregroundStyle(.secondary)
+            .background(Color(.secondarySystemBackground))
         }
     }
 }

@@ -14,13 +14,17 @@ extension APODDayView {
         let cachedImageData: Data?
         
         var body: some View {
-            Text(apod.title)
-                .font(.title2)
-                .bold()
-            mediaView
-                .frame(height: 300)
-            Text(apod.explanation)
-                .font(.body)
+            VStack {
+                Text(apod.title)
+                    .font(.title2)
+                    .bold()
+                mediaView
+                    .frame(height: 300)
+                Text(apod.explanation)
+                    .font(.body)
+            }
+            .foregroundStyle(.primary)
+            .background(Color(.systemBackground))
         }
         
         @ViewBuilder var mediaView: some View {

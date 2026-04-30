@@ -20,4 +20,3 @@ struct WebVideoView: UIViewRepresentable {
         webView.load(URLRequest(url: url))
     }
 }
-

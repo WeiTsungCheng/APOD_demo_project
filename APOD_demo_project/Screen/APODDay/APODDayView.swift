@@ -54,7 +54,6 @@ struct APODDayView: View {
                 if let apod = vm.apod {
                     APODDayFooterView(apod: apod)
                         .frame(maxWidth: .infinity)
-                        .background(Color(.systemGray6))
                 }
                
             }

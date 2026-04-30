@@ -31,12 +31,16 @@ extension APODDayView {
                     Image(systemName: "chevron.left")
                         .frame(width: 44, height: 44)
                         .foregroundStyle(.accent)
+                        .bold()
                 }
                 
                 DatePicker("Select Date",
                            selection: $selectedDate,
                            in: ...Date(),
                            displayedComponents: .date)
+                .foregroundStyle(.accent)
+                .font(.title)
+                .bold()
                 .datePickerStyle(.automatic)
                 .frame(maxWidth: .infinity, alignment: .center)
                 
@@ -51,10 +55,13 @@ extension APODDayView {
                     Image(systemName: "chevron.right")
                         .frame(width: 44, height: 44)
                         .foregroundStyle(.accent)
+                        .bold()
                 }
                 .disabled(!canGoNextDate)
                 .opacity(canGoNextDate ? 1 : 0.3)
             }
+            .foregroundStyle(.secondary)
+            .background(Color(.secondarySystemBackground))
         }
     }
 }
